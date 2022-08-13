@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.jimedem.dicer.DicerViewModel
+import de.jimedem.dicer.common.toSanitizedInt
 import de.jimedem.dicer.ui.screens.elements.RoundedBox
 import de.jimedem.dicer.ui.screens.elements.SendButton
 import de.jimedem.dicer.ui.theme.FelaColor
@@ -37,6 +38,9 @@ fun ConfigScreen() {
     val selectedDevice = viewModel.selectedDevice.collectAsState().value
     val color = if (selectedDevice.reachable.collectAsState().value) Color.Green else Color.Red
     val context = LocalContext.current
+    LaunchedEffect(""){
+        viewModel.init(context)
+    }
     Scaffold(topBar = { TopBar() }) {
         MaterialTheme.colors.onBackground
         Column(
@@ -59,15 +63,15 @@ fun ConfigScreen() {
             }
             TextConfigElement(
                 heading = "Initiale Tick Zeit in Ms:",
-                initialNumberText = 300,
+                initialNumberText = viewModel.initialTickDurationMs.collectAsState().value,
                 onTextChanged = {text -> viewModel.initialTickDurationMs.value = text})
             TextConfigElement(
                 heading = "Tickerhöhung pro Tick in %:",
-                initialNumberText = 10,
+                initialNumberText = viewModel.percentTickIncrease.collectAsState().value,
                 onTextChanged = {text -> viewModel.percentTickIncrease.value = text})
             TextConfigElement(
                 heading = "Letzter Tick wenn Tickzeit bei (in Ms):",
-                initialNumberText = 1000,
+                initialNumberText = viewModel.lastTickMs.collectAsState().value,
                 onTextChanged = {text -> viewModel.lastTickMs.value = text})
             TargetList()
             AnimationDropDown()
@@ -106,17 +110,15 @@ fun ConfigScreen() {
 }
 
 @Composable
-fun TextConfigElement(heading: String, initialNumberText: Int, onTextChanged: (String) -> Unit) {
-    var text by remember {
-        mutableStateOf(initialNumberText.toString())
-    }
+fun TextConfigElement(heading: String, initialNumberText: String, onTextChanged: (String) -> Unit) {
+    println("textConfigElement: $initialNumberText")
     Column(Modifier.fillMaxWidth()) {
         Text(text = heading)
         TextField(
-            value = text,
+            value = initialNumberText,
             modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
-            onValueChange = { text = it; onTextChanged(it) },
+            onValueChange = { onTextChanged(it) },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             colors = TextFieldDefaults.textFieldColors(
                 backgroundColor = Color.White,

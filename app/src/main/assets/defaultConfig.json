@@ -1,0 +1,12 @@
+{
+  "initialTickDurationMs": 300,
+  "percentTickIncrease": 10,
+  "lastTickMs": 1000,
+  "targets": [
+    [
+      1,
+      1
+    ]
+  ],
+  "animation": "NONE"
+}
