@@ -5,40 +5,55 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import de.jimedem.dicer.common.toSanitizedInt
 import de.jimedem.dicer.data.Animation
-import de.jimedem.dicer.data.BaseUrl
-import de.jimedem.dicer.states.CheckConnectionState
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
+import de.jimedem.dicer.data.Backend
+import de.jimedem.dicer.dto.ConfigDto
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.launch
+import java.net.ConnectException
 
 class DicerViewModel : ViewModel() {
 
     private var checkingConnection = false
 
-    var selectedDevice: MutableStateFlow<BaseUrl> = MutableStateFlow(BaseUrl.RaspberryPi)
+    var selectedDevice: MutableStateFlow<Backend> = MutableStateFlow(Backend.RaspberryPi)
 
     var animation: MutableStateFlow<Animation> = MutableStateFlow(Animation.None)
 
     private var _runs: SnapshotStateList<SnapshotStateList<Int>> =
         mutableStateListOf(mutableStateListOf(1))
 
-    // val targets: List<Run> = _targets
     val runs: List<List<Int>> = _runs
 
-    fun sendConfiguration(){
-        viewModelScope.launch(Dispatchers.IO) {
+    var initialTickDurationMs: MutableStateFlow<String> = MutableStateFlow("300")
+    var percentTickIncrease: MutableStateFlow<String> = MutableStateFlow("10")
+    var lastTickMs: MutableStateFlow<String> = MutableStateFlow("1000")
 
-        }
+    fun sendConfiguration(onSent: (Boolean) -> Unit) {
+        val configDto = ConfigDto(
+            initialTickDurationMs = initialTickDurationMs.value.toSanitizedInt(),
+            percentTickIncrease = percentTickIncrease.value.toSanitizedInt(),
+            lastTickMs = lastTickMs.value.toSanitizedInt(),
+            targets = _runs,
+            animation = animation.value.dtoText,
+        )
+        send({ selectedDevice.value.configure(configDto) }, onSent)
     }
 
-    fun saveConfiguration(context: Context){
+    fun sendStart(onSent: (Boolean) -> Unit) {
+        send({ selectedDevice.value.start() }, onSent = onSent)
+    }
+
+    fun sendStop(onSent: (Boolean) -> Unit) {
+        send({ selectedDevice.value.stop() }, onSent = onSent)
+    }
+
+    fun saveConfiguration(context: Context) {
 
     }
 
-    fun restoreDefaultConfiguration(context: Context){
+    fun restoreDefaultConfiguration(context: Context) {
 
     }
 
@@ -68,19 +83,33 @@ class DicerViewModel : ViewModel() {
     }
 
     fun checkConnection() {
-        if(!checkingConnection){
+        if (!checkingConnection) {
             checkingConnection = true
-            viewModelScope.launch {
-                while (checkingConnection){
-                    delay(2000)
-                    selectedDevice.value.reachable.value = true
+            viewModelScope.launch(Dispatchers.IO) {
+                while (checkingConnection) {
+                    delay(1000)
+                    selectedDevice.value.observeAlive()
                 }
             }
         }
-
     }
 
     fun targetList(run: Int) =
         _runs.filterIndexed { index, _ -> index == run }.firstOrNull()
 
+    private fun send(request: suspend () -> Boolean, onSent: (Boolean) -> Unit) {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                val success = request()
+                withContext(Dispatchers.Main) {
+                    onSent(success)
+                }
+            } catch (e: Exception) {
+                println(e.message)
+                withContext(Dispatchers.Main) {
+                    onSent(false)
+                }
+            }
+        }
+    }
 }

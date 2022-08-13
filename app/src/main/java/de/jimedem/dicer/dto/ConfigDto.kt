@@ -4,7 +4,7 @@ import com.squareup.moshi.JsonClass
 
 @JsonClass(generateAdapter = true)
 data class ConfigDto(
-    val initialTickDurationMs: Double,
+    val initialTickDurationMs: Int,
     val percentTickIncrease: Int,
     val lastTickMs: Int,
     val targets: List<List<Int>>,

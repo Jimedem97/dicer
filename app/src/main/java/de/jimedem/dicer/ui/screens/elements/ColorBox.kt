@@ -11,6 +11,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun RoundedBox(color: Color, modifier: Modifier){
+fun RoundedBox(color: Color, modifier: Modifier = Modifier){
     Box(modifier = modifier.then(Modifier.size(24.dp).clip(RoundedCornerShape(24.dp)).background(color)))
 }

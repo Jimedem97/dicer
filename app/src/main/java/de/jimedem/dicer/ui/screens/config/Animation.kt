@@ -22,7 +22,8 @@ fun AnimationDropDown() {
         Box {
             DropDownText(
                 text = viewModel.animation.collectAsState().value.displayText,
-                isExpanded = expanded
+                isExpanded = expanded,
+                Modifier.fillMaxWidth()
             ) {
                 expanded = true
             }

@@ -1,8 +1,13 @@
 package de.jimedem.dicer.ui.screens.config
 
+import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Restore
@@ -11,6 +16,8 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
@@ -29,6 +36,7 @@ fun ConfigScreen() {
     val viewModel = viewModel<DicerViewModel>()
     val selectedDevice = viewModel.selectedDevice.collectAsState().value
     val color = if (selectedDevice.reachable.collectAsState().value) Color.Green else Color.Red
+    val context = LocalContext.current
     Scaffold(topBar = { TopBar() }) {
         MaterialTheme.colors.onBackground
         Column(
@@ -38,37 +46,63 @@ fun ConfigScreen() {
                 .fillMaxSize()
                 .padding(it)
                 .padding(8.dp)
-
+                .verticalScroll(rememberScrollState())
         ) {
             Column {
                 Text("Abspielgerät:")
                 Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                     DeviceDropDown(Modifier)
                     Spacer(modifier = Modifier.weight(1f))
-                    RoundedBox(color = color, Modifier)
+                    RoundedBox(color = color)
                     Spacer(modifier = Modifier.weight(1f))
                 }
             }
             TextConfigElement(
                 heading = "Initiale Tick Zeit in Ms:",
-                initialNumberText = 100,
-                onTextChanged = {})
+                initialNumberText = 300,
+                onTextChanged = {text -> viewModel.initialTickDurationMs.value = text})
             TextConfigElement(
                 heading = "Tickerhöhung pro Tick in %:",
                 initialNumberText = 10,
-                onTextChanged = {})
+                onTextChanged = {text -> viewModel.percentTickIncrease.value = text})
             TextConfigElement(
                 heading = "Letzter Tick wenn Tickzeit bei (in Ms):",
                 initialNumberText = 1000,
-                onTextChanged = {})
+                onTextChanged = {text -> viewModel.lastTickMs.value = text})
             TargetList()
             AnimationDropDown()
-            SendButton(text = "Senden", modifier = Modifier.fillMaxWidth()) {
-                viewModel.sendConfiguration()
+            SendButton(text = "Konfiguration senden", modifier = Modifier.fillMaxWidth()) {
+                viewModel.sendConfiguration { success ->
+                    val text = if(success){
+                        "Konfiguration erfolgreich gesendet"
+                    } else{
+                        "Konfiguration konnte nicht gesendet werden"
+                    }
+                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                }
+            }
+            SendButton(text = "Starten", modifier = Modifier.fillMaxWidth()) {
+                viewModel.sendStart {success ->
+                    val text = if(success){
+                        "Dicer erfolgreich gestartet"
+                    } else{
+                        "Dicer konnte nicht gestartet werden"
+                    }
+                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                }
+            }
+            SendButton(text = "Stoppen", modifier = Modifier.fillMaxWidth()) {
+                viewModel.sendStop {success ->
+                    val text = if(success){
+                        "Dicer erfolgreich gestoppt"
+                    } else{
+                        "Dicer konnte nicht gestoppt werden"
+                    }
+                    Toast.makeText(context, text, Toast.LENGTH_LONG).show()
+                }
             }
         }
     }
-
 }
 
 @Composable

@@ -1,21 +1,27 @@
 package de.jimedem.dicer.ui.screens.config
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.material.DropdownMenu
-import androidx.compose.material.DropdownMenuItem
-import androidx.compose.material.Text
-import androidx.compose.material.TextButton
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.viewmodel.compose.viewModel
 import de.jimedem.dicer.DicerViewModel
+import de.jimedem.dicer.ui.screens.elements.DropDownText
+import de.jimedem.dicer.ui.theme.FelaColor
+
+@Preview
+@Composable
+fun PreviewNumberPickerDialog() {
+    NumberPickerDialog(run = 1, targetIndex = 1) {
+
+    }
+}
 
 @Composable
 fun NumberPickerDialog(
@@ -28,31 +34,48 @@ fun NumberPickerDialog(
     var number by remember { mutableStateOf(initialNumber) }
 
     Dialog(onDismissRequest = onDismissDialog, properties = DialogProperties()) {
-        Column(Modifier.background(Color.White)) {
-            Text(text = "Zahl auswählen:")
-            NumberDropDown(number) { number = it }
-            Row {
-                if (targetIndex > -1) {
-                    TextButton(onClick = {
-                        viewModel.removeTarget(run, targetIndex)
-                        onDismissDialog()
-                    }) {
-                        Text(text = "Nummer entfernen")
-                    }
-                }
-                TextButton(onClick = {
+        Card(elevation = 0.dp, shape = RoundedCornerShape(8.dp)) {
+            Column(Modifier.padding(8.dp), verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                Text(text = "Zahl auswählen:")
+                NumberDropDown(number) { number = it }
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
                     if (targetIndex > -1) {
-                        viewModel.modifyTarget(run, targetIndex, number)
-                    } else {
-                        viewModel.addTarget(run, number)
+                        TextButton(
+                            onClick = {
+                                viewModel.removeTarget(run, targetIndex)
+                                onDismissDialog()
+                            },
+                            colors = ButtonDefaults.buttonColors(
+                                backgroundColor = FelaColor,
+                                contentColor = Color.Black
+                            ),
+                            modifier = Modifier.weight(1f)
+                        ) {
+                            Text(text = "Löschen")
+                        }
                     }
-                    onDismissDialog()
-                }) {
-                    Text(text = "Speichern")
+                    TextButton(
+                        onClick = {
+                            if (targetIndex > -1) {
+                                viewModel.modifyTarget(run, targetIndex, number)
+                            } else {
+                                viewModel.addTarget(run, number)
+                            }
+                            onDismissDialog()
+                        },
+                        colors = ButtonDefaults.buttonColors(
+                            backgroundColor = FelaColor,
+                            contentColor = Color.Black
+                        ),
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Text(text = "Speichern")
+                    }
                 }
-            }
 
+            }
         }
+
     }
 }
 
@@ -60,7 +83,9 @@ fun NumberPickerDialog(
 fun NumberDropDown(number: Int, onNumberSelected: (Int) -> Unit) {
     var expanded by remember { mutableStateOf(false) }
     Box {
-        Text("$number", Modifier.clickable { expanded = true })
+        DropDownText(text = "$number", isExpanded = expanded, modifier = Modifier.fillMaxWidth()) {
+            expanded = true
+        }
         DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
             (1..6).toList().forEach { dropDownNumber ->
                 DropdownMenuItem(onClick = {
