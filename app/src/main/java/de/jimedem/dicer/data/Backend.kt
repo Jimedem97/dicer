@@ -41,9 +41,9 @@ sealed class Backend(
         return webService.configure(dto).isSuccessful
     }
 
-    object RaspberryPi : Backend("Raspberry Pi", "http://joni-media:8080")
+    object RaspberryPi : Backend("Raspberry Pi", "http://192.168.1.22")
 
-    object Laptop : Backend("Laptop", "http://joni-laptop-alt:8080")
+    object Laptop : Backend("Laptop", "http://192.168.1.23")
 //    object Laptop : Backend("Laptop", "http://10.0.2.2:8080")
 
     companion object {
