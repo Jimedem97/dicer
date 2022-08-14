@@ -38,9 +38,6 @@ fun ConfigScreen() {
     val selectedDevice = viewModel.selectedDevice.collectAsState().value
     val color = if (selectedDevice.reachable.collectAsState().value) Color.Green else Color.Red
     val context = LocalContext.current
-    LaunchedEffect(""){
-        viewModel.init(context)
-    }
     Scaffold(topBar = { TopBar() }) {
         MaterialTheme.colors.onBackground
         Column(

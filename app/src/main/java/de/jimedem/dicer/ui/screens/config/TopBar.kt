@@ -2,7 +2,9 @@ package de.jimedem.dicer.ui.screens.config
 
 import android.widget.Toast
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.Icon
 import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Text
@@ -41,22 +43,25 @@ fun TopBar() {
         },
         backgroundColor = FelaColor,
         actions = {
-            Icon(imageVector = Icons.Default.Restore, contentDescription = "", modifier =
-            Modifier
-                .clickable {
-                    viewModel.restoreDefaultConfiguration(context) {
-                        Toast
-                            .makeText(
-                                context,
-                                "Standardkonfiguration wiederhergestellt",
-                                Toast.LENGTH_LONG
-                            )
-                            .show()
-                    }
-                }
-                .padding(end = 16.dp),
-                tint = Color.Black)
-            Icon(imageVector = Icons.Default.Save, contentDescription = "",
+            Icon(
+                imageVector = Icons.Default.Restore, contentDescription = "", modifier =
+                Modifier
+                    .clickable {
+                        viewModel.restoreDefaultConfiguration(context) {
+                            Toast
+                                .makeText(
+                                    context,
+                                    "Standardkonfiguration wiederhergestellt",
+                                    Toast.LENGTH_LONG
+                                )
+                                .show()
+                        }
+                    },
+                tint = Color.Black
+            )
+            Spacer(modifier = Modifier.width(16.dp))
+            Icon(
+                imageVector = Icons.Default.Save, contentDescription = "",
                 Modifier
                     .clickable {
                         viewModel.saveConfiguration(context) {
@@ -64,9 +69,10 @@ fun TopBar() {
                                 .makeText(context, "Konfiguration gespeichert", Toast.LENGTH_LONG)
                                 .show()
                         }
-                    }
-                    .padding(end = 8.dp),
-                tint = Color.Black)
+                    },
+                tint = Color.Black
+            )
+            Spacer(modifier = Modifier.width(8.dp))
         }
     )
 }

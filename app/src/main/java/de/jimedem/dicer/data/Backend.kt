@@ -29,20 +29,29 @@ sealed class Backend(
         }
     }
 
-    suspend fun start(): Boolean{
+    suspend fun start(): Boolean {
         return webService.start().isSuccessful
     }
 
-    suspend fun stop(): Boolean{
+    suspend fun stop(): Boolean {
         return webService.stop().isSuccessful
     }
 
-    suspend fun configure(dto: ConfigDto): Boolean{
+    suspend fun configure(dto: ConfigDto): Boolean {
         return webService.configure(dto).isSuccessful
     }
 
-    object RaspberryPi : Backend("Raspberry Pi", "http://joni-media")
+    object RaspberryPi : Backend("Raspberry Pi", "http://joni-media:8080")
 
-    //    object Laptop : BaseUrl("Laptop", "joni-laptop-alt")
-    object Laptop : Backend("Laptop", "http://10.0.2.2:8080")
+    object Laptop : Backend("Laptop", "http://joni-laptop-alt:8080")
+//    object Laptop : Backend("Laptop", "http://10.0.2.2:8080")
+
+    companion object {
+        fun of(string: String): Backend {
+            return when (string) {
+                "Laptop" -> Laptop
+                else -> RaspberryPi
+            }
+        }
+    }
 }

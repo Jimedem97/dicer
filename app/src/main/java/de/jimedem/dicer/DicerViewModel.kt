@@ -9,6 +9,7 @@ import androidx.lifecycle.viewModelScope
 import com.squareup.moshi.Moshi
 import de.jimedem.dicer.common.toSanitizedInt
 import de.jimedem.dicer.data.Animation
+import de.jimedem.dicer.data.AppConfig
 import de.jimedem.dicer.data.Backend
 import de.jimedem.dicer.dto.ConfigDto
 import kotlinx.coroutines.*
@@ -34,18 +35,25 @@ class DicerViewModel : ViewModel() {
     var percentTickIncrease: MutableStateFlow<String> = MutableStateFlow("10")
     var lastTickMs: MutableStateFlow<String> = MutableStateFlow("1000")
 
-    fun init(context: Context){
-        viewModelScope.launch(Dispatchers.IO) {
-            val file = File(context.filesDir.absolutePath, "config.json")
-            if(file.exists()){
+    var isInitialized: Boolean = false
+        private set
+
+    fun init(context: Context) {
+        val file = File(context.filesDir.absolutePath, "config.json")
+        if (file.exists()) {
+            viewModelScope.launch(Dispatchers.IO) {
                 file.reader().use { reader ->
-                    val configDto = ConfigDto.fromJson(reader.readText())
-                    configDto?.let { it1 -> setValuesOfConfig(it1) }
+                    val appConfig = AppConfig.fromJson(reader.readText())
+                    appConfig?.let { config -> setValuesOfConfig(config) }
                 }
-            } else{
-                restoreDefaultConfiguration(context){}
+                isInitialized = true
+            }
+        } else {
+            restoreDefaultConfiguration(context) {
+                isInitialized = true
             }
         }
+
     }
 
     fun sendConfiguration(onSent: (Boolean) -> Unit) {
@@ -65,7 +73,12 @@ class DicerViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             val file = File(context.filesDir.absolutePath, "config.json")
             file.createNewFile()
-            file.writeText(createConfigDto().toJson())
+            file.writeText(
+                AppConfig(
+                    device = selectedDevice.value.name,
+                    configDto = createConfigDto()
+                ).toJson()
+            )
             withContext(Dispatchers.Main) {
                 onSaved()
             }
@@ -76,8 +89,8 @@ class DicerViewModel : ViewModel() {
         viewModelScope.launch(Dispatchers.IO) {
             context.assets.open("defaultConfig.json").use {
                 it.reader().use { reader ->
-                    val configDto = ConfigDto.fromJson(reader.readText())
-                    configDto?.let { it1 -> setValuesOfConfig(it1) }
+                    val appConfig = AppConfig.fromJson(reader.readText())
+                    appConfig?.let { config -> setValuesOfConfig(config) }
                 }
             }
             withContext(Dispatchers.Main) {
@@ -152,14 +165,18 @@ class DicerViewModel : ViewModel() {
         )
     }
 
-    private fun setValuesOfConfig(dto: ConfigDto) {
-        initialTickDurationMs.value = dto.initialTickDurationMs.toString()
-        percentTickIncrease.value = dto.percentTickIncrease.toString()
-        lastTickMs.value = dto.lastTickMs.toString()
-        _runs.clear()
-        dto.targets.forEach {
-            _runs.add(it.toMutableStateList())
+    private suspend fun setValuesOfConfig(appConfig: AppConfig) {
+        withContext(Dispatchers.Main) {
+            val dto = appConfig.configDto
+            initialTickDurationMs.value = dto.initialTickDurationMs.toString()
+            percentTickIncrease.value = dto.percentTickIncrease.toString()
+            lastTickMs.value = dto.lastTickMs.toString()
+            _runs.clear()
+            dto.targets.forEach {
+                _runs.add(it.toMutableStateList())
+            }
+            animation.value = Animation.of(dto.animation)
+            selectedDevice.value = Backend.of(appConfig.device)
         }
-        animation.value = Animation.of(dto.animation)
     }
 }
