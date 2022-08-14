@@ -115,6 +115,7 @@ fun TextConfigElement(heading: String, initialNumberText: String, onTextChanged:
             value = initialNumberText,
             modifier = Modifier.fillMaxWidth(),
             maxLines = 1,
+            singleLine = true,
             onValueChange = { onTextChanged(it) },
             keyboardOptions = KeyboardOptions.Default.copy(keyboardType = KeyboardType.Number),
             colors = TextFieldDefaults.textFieldColors(
