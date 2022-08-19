@@ -37,6 +37,9 @@ fun AnimationDropDown() {
                 AnimationDropDownItem(
                     animation = Animation.Animation2,
                     changeExpanded = { expanded = it })
+                AnimationDropDownItem(
+                    animation = Animation.CubeAnimation,
+                    changeExpanded = { expanded = it })
             }
         }
     }

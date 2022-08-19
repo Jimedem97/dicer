@@ -27,24 +27,11 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
 
         setContent {
-
             val viewModel = viewModel<DicerViewModel>()
-
             splashScreen.setKeepOnScreenCondition {
                 !viewModel.isInitialized
             }
             viewModel.init(LocalContext.current)
-//            val view = LocalView.current
-//            view.viewTreeObserver.addOnPreDrawListener(object : ViewTreeObserver.OnPreDrawListener {
-//                override fun onPreDraw(): Boolean {
-//                    if (viewModel.isInitialized) {
-//                        view.viewTreeObserver.removeOnPreDrawListener(this)
-//                        return true
-//                    }
-//                    return false
-//                }
-//
-//            })
             viewModel.checkConnection()
             DicerTheme {
                 // A surface container using the 'background' color from the theme

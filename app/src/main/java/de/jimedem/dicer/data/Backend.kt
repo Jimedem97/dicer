@@ -42,7 +42,6 @@ sealed class Backend(
     }
 
     object RaspberryPi : Backend("Raspberry Pi", "http://192.168.1.22")
-
     object Laptop : Backend("Laptop", "http://192.168.1.23")
 //    object Laptop : Backend("Laptop", "http://10.0.2.2:8080")
 
