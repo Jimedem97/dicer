@@ -20,6 +20,9 @@ import de.jimedem.dicer.ui.screens.elements.AddButton
 import de.jimedem.dicer.ui.screens.elements.RemoveButton
 import de.jimedem.dicer.ui.theme.FelaColor
 
+const val MAX_DICES = 2
+const val MAX_RUNS = 4
+
 @Composable
 fun TargetList() {
     val viewModel = viewModel<DicerViewModel>()
@@ -28,7 +31,7 @@ fun TargetList() {
     runs.forEachIndexed { index, _ ->
         Targets(run = index)
     }
-    AddButton(text = "Durchgang hinzufügen", isEnabled = runs.size < 4) {
+    AddButton(text = "Durchgang hinzufügen", isEnabled = runs.size < MAX_RUNS) {
         viewModel.addRun()
     }
     RemoveButton(text = "Letzten Durchgang entfernen", isEnabled = runs.size > 1) {
@@ -48,7 +51,11 @@ fun Targets(run: Int) {
             showDialog = false
         }
     }
-    Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        modifier = Modifier.fillMaxWidth()
+    ) {
         Text(text = "Durchgang ${run + 1}:")
         targets.forEachIndexed { index, target ->
             Card(backgroundColor = FelaColor, modifier = Modifier.size(24.dp)) {
@@ -61,12 +68,16 @@ fun Targets(run: Int) {
                             showDialog = true
                         }
                         .align(Alignment.CenterVertically),
-                    style = LocalTextStyle.current.copy(color = MaterialTheme.colors.onPrimary, fontSize = 16.sp, textAlign = TextAlign.Center)
+                    style = LocalTextStyle.current.copy(
+                        color = MaterialTheme.colors.onPrimary,
+                        fontSize = 16.sp,
+                        textAlign = TextAlign.Center
+                    )
                 )
             }
         }
         Spacer(modifier = Modifier.weight(1f))
-        AddButton("Zahl hinzufügen", targets.size < 4) {
+        AddButton("Zahl hinzufügen", targets.size < MAX_DICES) {
             dialogTargetIndex = -1
             dialogNumber = 1
             showDialog = true

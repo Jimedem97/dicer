@@ -100,7 +100,7 @@ class DicerViewModel : ViewModel() {
     }
 
     fun addRun() {
-        _runs.add(mutableStateListOf(1))
+        _runs.add(mutableStateListOf(1, 1))
     }
 
     fun addTarget(run: Int, number: Int) {
